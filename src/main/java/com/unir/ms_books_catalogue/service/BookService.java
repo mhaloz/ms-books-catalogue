@@ -1,41 +1,38 @@
 package com.unir.ms_books_catalogue.service;
-
 import com.unir.ms_books_catalogue.model.Book;
 import com.unir.ms_books_catalogue.repository.BookRepository;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-
+import com.unir.ms_books_catalogue.mapper.BookMapper;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
 public class BookService {
 
     private final BookRepository repository;
+    private final BookMapper bookMapper;
 
-    public BookService(BookRepository repository) {
+    public BookService(BookRepository repository, BookMapper bookMapper) {
         this.repository = repository;
+        this.bookMapper = bookMapper;
     }
 
     public Book save(Book book) {
         return repository.save(book);
     }
 
-    public Optional<Book> update(Long id, Book data) {
-        return repository.findById(id).map(book -> {
-            if (data.getTitle() != null) book.setTitle(data.getTitle());
-            if (data.getAuthor() != null) book.setAuthor(data.getAuthor());
-            if (data.getCategory() != null) book.setCategory(data.getCategory());
-            if (data.getPublicationDate() != null) book.setPublicationDate(data.getPublicationDate());
-            if (data.getIsbn() != null) book.setIsbn(data.getIsbn());
-            if (data.getRating() != null) book.setRating(data.getRating());
-            if (data.getVisible() != null) book.setVisible(data.getVisible());
-            return repository.save(book);
-        });
-    }
-
     public void delete(Long id) {
         repository.deleteById(id);
+    }
+
+    public Optional<Book> update(Long id, Book data) {
+        return repository.findById(id).map(book -> {
+            bookMapper.updateBookFromDto(book, data);
+            book.setUpdatedAt(LocalDateTime.now());
+            return repository.save(book);
+        });
     }
 
     public List<Book> search(Map<String, String> filters) {
