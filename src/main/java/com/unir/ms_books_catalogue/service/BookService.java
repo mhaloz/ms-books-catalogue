@@ -34,26 +34,34 @@ public class BookService {
             return repository.save(book);
         });
     }
+    public Optional<Book> getById(Long id) {
+        return repository.findById(id);
+    }
 
-    public List<Book> search(Map<String, String> filters) {
-        Specification<Book> spec = (root, query, cb) -> {
+    public List<Book> getAvailableBooks() {
+        // Siempre retorna libros visibles y con stock
+        return repository.findAll((root, query, cb) -> cb.and(
+                cb.greaterThan(root.get("stock"), 0),
+                cb.isTrue(root.get("visible"))
+        ));
+    }
+
+    public List<Book> searchAvailableBooks(String searchTerm) {
+        return repository.findAll((root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-            filters.forEach((key, value) -> {
-                switch (key) {
-                    case "rating":
-                        predicates.add(cb.equal(root.get(key), Integer.valueOf(value)));
-                        break;
-                    case "visible":
-                        predicates.add(cb.equal(root.get(key), Boolean.valueOf(value)));
-                        break;
-                    default:
-                        predicates.add(cb.like(cb.lower(root.get(key)), "%" + value.toLowerCase() + "%"));
-                        break;
-                }
-            });
-            return cb.and(predicates.toArray(new Predicate[0]));
-        };
 
-        return repository.findAll(spec);
+            // Reglas obligatorias
+            predicates.add(cb.greaterThan(root.get("stock"), 0));
+            predicates.add(cb.isTrue(root.get("visible")));
+
+            if (searchTerm != null && !searchTerm.trim().isEmpty()) {
+                String likeTerm = "%" + searchTerm.toLowerCase() + "%";
+                Predicate titleMatch = cb.like(cb.lower(root.get("title")), likeTerm);
+                Predicate authorMatch = cb.like(cb.lower(root.get("author")), likeTerm);
+                predicates.add(cb.or(titleMatch, authorMatch));
+            }
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        });
     }
 }
