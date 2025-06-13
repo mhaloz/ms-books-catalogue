@@ -15,29 +15,11 @@ Microservicio Spring Boot para la gestión de un catálogo de libros.
 - PostgreSQL
 
 ## Estructura del Proyecto
-ms-books-catalogue/
-├── src/
-│   ├── main/
-│   │   ├── java/
-│   │   │   └── com/
-│   │   │       └── Unir
-│   │   │               ├── MsBooksCatalogueApplication.java
-│   │   │               ├── controller/
-│   │   │               ├── model/
-│   │   │               ├── repository/
-│   │   │               └── service/
-│   │   └── resources/
-│   │       ├── application.properties
-│   │       └── db/
-│   │           └── scripts/
-│   │               └── script.sql
-│   └── test/
-│       └── java/
-│           └── com/
-│               └── yourcompany/
-│                   └── books/
-├── pom.xml
-└── README.md
+controller/: REST controllers
+model/: Entity classes
+repository/: Data access layer
+service/: Business logic
+resources/: Config files and SQL scripts
 
 2. **Configura la base de datos:**
    -- Ejecutar los siguentes comandos:
